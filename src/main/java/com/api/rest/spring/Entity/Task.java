@@ -14,11 +14,30 @@ public class Task {
     private Integer id;
     private String taskName;
     private String taskDesc;
+    private String taskOwner;
+    private String taskStatus;
     private Date created;
 
     @PrePersist
     protected void onCreate(){
         created = new Date();
+    }
+
+
+    public String getTaskStatus() {
+        return taskStatus;
+    }
+
+    public void setTaskStatus(String taskStatus) {
+        this.taskStatus = taskStatus;
+    }
+
+    public String getTaskOwner() {
+        return taskOwner;
+    }
+
+    public void setTaskOwner(String taskOwner) {
+        this.taskOwner = taskOwner;
     }
 
     public Integer getId() {
@@ -61,21 +80,13 @@ public class Task {
         return id.equals(task.id) &&
                 taskName.equals(task.taskName) &&
                 taskDesc.equals(task.taskDesc) &&
+                taskOwner.equals(task.taskOwner) &&
+                taskStatus.equals(task.taskStatus) &&
                 created.equals(task.created);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, taskName, taskDesc, created);
-    }
-
-    @Override
-    public String toString() {
-        return "Task{" +
-                "id=" + id +
-                ", taskName='" + taskName + '\'' +
-                ", taskDesc='" + taskDesc + '\'' +
-                ", created=" + created +
-                '}';
+        return Objects.hash(id, taskName, taskDesc, taskOwner, taskStatus, created);
     }
 }
