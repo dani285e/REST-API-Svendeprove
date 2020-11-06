@@ -23,7 +23,7 @@ public class LoginController {
     }
 
     public String makeSession(Integer userId){
-        
+
 
         return "";
     }
@@ -35,8 +35,8 @@ public class LoginController {
         return session;
     }
 
-    public Session loginLogout (Object objSession, boolean sessionStatus){
-        Session session = (Session) objSession;
+    public Session loginLogout (Session objSession, boolean sessionStatus){
+        Session session = objSession;
         if (sessionStatus){
             session.setSessionStatus(false);
         } else {

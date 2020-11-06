@@ -6,7 +6,7 @@ public class UserDto {
     private String role;
     private String email;
 
-    public UserDto(Integer id, String username, Integer role, String email) {
+    public UserDto(Integer id, String username, String role, String email) {
         this.id = id;
         this.username = username;
         this.role = role;

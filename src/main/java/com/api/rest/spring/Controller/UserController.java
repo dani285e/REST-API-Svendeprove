@@ -19,13 +19,9 @@ public class UserController {
         return "Greeting from spring";
     }
 
-    @PostMapping("/login")
-    public String login(@RequestParam String username, @RequestParam String password){
-        return "login";
-    }
 
     @PostMapping("/add")
-    public String addUser(@RequestParam String username, @RequestParam Integer role, @RequestParam String password, @RequestParam String email) {
+    public String addUser(@RequestParam String username, @RequestParam String role, @RequestParam String password, @RequestParam String email) {
         String randomSalt = UUID.randomUUID().toString();
         User user = new User();
         user.setUsername(username);
@@ -48,7 +44,7 @@ public class UserController {
         User temp = userRepository.findUserById(id);
         Integer uId = temp.getId();
         String uName = temp.getUsername();
-        Integer uRole = temp.getRole();
+        String uRole = temp.getRole();
         String uEmail = temp.getEmail();
         UserDto userDto = new UserDto(uId, uName, uRole, uEmail);
         return userDto;

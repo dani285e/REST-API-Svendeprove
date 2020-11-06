@@ -14,7 +14,7 @@ public class User {
     @GeneratedValue
     private Integer id;
     private String username;
-    private Integer role;
+    private String role;
     private String email;
     private String salt;
     private String password;
@@ -34,11 +34,11 @@ public class User {
         return username;
     }
 
-    public Integer getRole() {
+    public String getRole() {
         return role;
     }
 
-    public void setRole(Integer role) {
+    public void setRole(String role) {
         this.role = role;
     }
 
