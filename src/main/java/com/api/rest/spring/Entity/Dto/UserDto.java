@@ -1,12 +1,14 @@
 package com.api.rest.spring.Entity.Dto;
 
+import com.api.rest.spring.Entity.Enum.Role;
+
 public class UserDto {
     private Integer id;
     private String username;
-    private String role;
+    private Role role;
     private String email;
 
-    public UserDto(Integer id, String username, String role, String email) {
+    public UserDto(Integer id, String username, Role role, String email) {
         this.id = id;
         this.username = username;
         this.role = role;
@@ -17,7 +19,6 @@ public class UserDto {
         return id;
     }
 
-
     public String getUsername() {
         return username;
     }
@@ -26,11 +27,11 @@ public class UserDto {
         this.username = username;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 

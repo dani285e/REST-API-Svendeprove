@@ -1,6 +1,8 @@
 package com.api.rest.spring.Entity;
 
 
+import com.api.rest.spring.Entity.Enum.TaskStatus;
+
 import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -17,7 +19,7 @@ public class Task {
     private String taskName;
     private String taskDesc;
     private String taskOwner;
-    private String taskStatus;
+    private TaskStatus taskStatus;
     private Date created;
     @ManyToMany
     private List<User> users = new ArrayList<>();
@@ -27,12 +29,11 @@ public class Task {
         created = new Date();
     }
 
-
-    public String getTaskStatus() {
+    public TaskStatus getTaskStatus() {
         return taskStatus;
     }
 
-    public void setTaskStatus(String taskStatus) {
+    public void setTaskStatus(TaskStatus taskStatus) {
         this.taskStatus = taskStatus;
     }
 
@@ -46,10 +47,6 @@ public class Task {
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getTaskName() {
@@ -70,10 +67,6 @@ public class Task {
 
     public Date getCreated() {
         return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
     }
 
     @Override

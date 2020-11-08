@@ -4,6 +4,8 @@ import javax.persistence.*;
 
 import com.api.rest.spring.Entity.Enum.Role;
 import com.api.rest.spring.Entity.Task;
+import com.sun.istack.NotNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -15,11 +17,17 @@ public class User {
     @Id
     @GeneratedValue
     private Integer id;
+    @NotNull
     private String username;
+    @NotNull
     private Role role;
+    @NotNull
     private String email;
+    @NotNull
     private String salt;
+    @NotNull
     private String password;
+    @NotNull
     private Boolean userStatus;
 
     @ManyToMany(mappedBy = "users")
@@ -28,10 +36,6 @@ public class User {
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getUsername() {
@@ -74,11 +78,21 @@ public class User {
         this.password = password;
     }
 
+    public void setUserStatus(Boolean userStatus) {
+        this.userStatus = userStatus;
+    }
+
     public Boolean getUserStatus() {
         return userStatus;
     }
 
-    public void setUserStatus(Boolean userStatus) {
-        this.userStatus = userStatus;
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", role=" + role +
+                '}';
     }
+
 }

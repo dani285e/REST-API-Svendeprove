@@ -1,20 +1,27 @@
 package com.api.rest.spring.handlers;
 
+import com.api.rest.spring.Entity.Dto.UserDto;
 import com.api.rest.spring.Entity.Enum.Role;
 import com.api.rest.spring.Entity.User;
 import com.api.rest.spring.Entity.builders.UserBuilder;
 import com.api.rest.spring.WebApiHelper;
+import com.api.rest.spring.handlers.exceptions.AuthorizationException;
 import com.api.rest.spring.handlers.exceptions.ValidationException;
 import com.api.rest.spring.repository.UserRepository;
 import org.springframework.dao.DataAccessException;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.server.ResponseStatusException;
 
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
 import java.util.Objects;
 import java.util.UUID;
 
 public class UserHandler {
+
+    //TODO make general userValidation method
+
+    public UserHandler(UserRepository userRepository) {
+        this.userRepository = Objects.requireNonNull(userRepository);
+    }
 
     private UserRepository userRepository;
 
@@ -38,14 +45,9 @@ public class UserHandler {
             //TODO Ask Jonas what to return, return stack or return null?
             return null;
         }
-
     }
 
-    public UserHandler(UserRepository userRepository) {
-        this.userRepository = Objects.requireNonNull(userRepository);
-    }
-
-    public void validateUser(String username, String role, String password, String email) throws ValidationException {
+    private void validateUserForCreating(String username, String role, String password, String email) throws ValidationException {
         if (username == null || username.isEmpty())
             throw new ValidationException("Username is null or empty");
 
@@ -71,12 +73,12 @@ public class UserHandler {
 
 
 
-            //TODO ? mail validation ?
+        //TODO ? mail validation ?
 
     }
 
     public void createUser(String username, String role, String password, String email) throws ValidationException {
-        validateUser(username, role, password, email);
+        validateUserForCreating(username, role, password, email);
 
         UserBuilder userBuilder = UserBuilder.aUserBuilder();
 
@@ -89,35 +91,153 @@ public class UserHandler {
                 .build();
 
         userRepository.save(build);
-        //TODO talk to Jonas, does this need a return?
     }
 
 
-    public void updateUser(Integer id) throws Exception {
-        User user = findUserById(id);
+    /**
+     *
+     * @param updateUserId
+     * @param requestingUserId
+     * @param userDto
+     * @throws Exception
+     */
+    public void updateUser(Integer updateUserId, Integer requestingUserId, UserDto userDto) throws Exception {
 
+        User updateUser = findUserById(updateUserId);
+        User requestingUser = findUserById(requestingUserId);
+        ValidateUser(updateUser, requestingUser, userDto);
 
-        // if null, throw exception
-
-        // use input variables to set new valeus on user
-
-        userRepository.save(user);
-
+        updateUser.setUsername(userDto.getUsername());
+        updateUser.setEmail(userDto.getEmail());
+        updateUser.setRole(userDto.getRole());
+        userRepository.save(updateUser);
     }
 
-    public void  deleteUser(){
-
+    /**
+     *
+     * @param validateUser
+     * @param requestingUser
+     * @param userDto
+     * @throws ValidationException
+     * @throws AuthorizationException
+     */
+    private void ValidateUser(User validateUser, User requestingUser, UserDto userDto) throws ValidationException, AuthorizationException {
+        if (validateUser == null)
+            throw new ValidationException("User for deletion not found");
+        if (requestingUser == null)
+            throw new ValidationException("Requesting user not found");
+        ValidateUserDTO(userDto);
+        ValidateEmail(validateUser.getEmail(), userDto.getEmail());
+        ValidateUserPermission(userDto, validateUser, requestingUser);
+        ValidateRole(userDto.getRole(), validateUser.getRole(), requestingUser.getRole());
+        ValidateUsername(userDto.getUsername(), requestingUser.getUsername());
     }
-    //TODO Delete
-
-    public void deactivateUser(){
-
+    private void ValidateUserPermission(UserDto userDto, User updateUser, User requestingUser) throws AuthorizationException{
+        if (!(updateUser.getId() == requestingUser.getId()) && !WebApiHelper.ADMIN_ROLES.contains(requestingUser.getRole()))
+            throw new AuthorizationException("User does not have permission to update user");
+        if (!WebApiHelper.ADMIN_ROLES.contains(requestingUser.getRole()))
+            throw new AuthorizationException("User does not have permission to chance roles");
+        if (updateUser.getRole() == Role.CUSTOMER && userDto.getRole() != Role.CUSTOMER)
+            throw new AuthorizationException("User does not have permission to have that role");
+        if (WebApiHelper.PROTECTED_USER_ROLES.contains(userDto.getRole()))
+            throw new AuthorizationException("Super admin is a protected role");
+    }
+    private void ValidateUserDTO(UserDto userDto)throws ValidationException{
+        if (userDto == null)
+            throw new ValidationException("User Dto is null");
+    }
+    private void ValidateEmail(String oldEmail, String newEmail) throws ValidationException{
+        if (newEmail == null || newEmail.replaceAll("\\s","").isEmpty())
+            throw new ValidationException("New Email is null or empty");
+        if (oldEmail == null || oldEmail.replaceAll("\\s","").isEmpty())
+            throw new ValidationException("New Email is null or empty");
+        try {
+            InternetAddress oldEmailAddr = new InternetAddress(oldEmail);
+            oldEmailAddr.validate();
+        } catch (AddressException ex) {
+            throw new ValidationException("Old email address is not an email");
+        }
+        try {
+            InternetAddress newEmailAddr = new InternetAddress(newEmail);
+            newEmailAddr.validate();
+        } catch (AddressException ex) {
+            throw new ValidationException("New email address is not an email");
+        }
+    }
+    private void ValidateRole(Role userDto, Role oldRole, Role newRole) throws ValidationException{
+        if (newRole == null)
+            throw new ValidationException("New Email is null");
+        if (oldRole == null)
+            throw new ValidationException("Old role is null");
+        if (userDto == null)
+            throw new ValidationException("UserDto role is null");
+    }
+    private void ValidateUsername(String oldUserName, String newUserName) throws ValidationException{
+        if (newUserName == null || newUserName.replaceAll("\\s","").isEmpty())
+            throw new ValidationException("New Username is null or empty");
+        if (oldUserName == null || oldUserName.replaceAll("\\s","").isEmpty())
+            throw new ValidationException("New Username is null or empty");
     }
 
-    public void resetPassword(){
 
+    /**
+     *
+     * @param userToBeDeletedId
+     * @param requestingUserId
+     * @throws ValidationException
+     * @throws AuthorizationException
+     */
+    public void  deleteUser(Integer userToBeDeletedId, Integer requestingUserId) throws ValidationException, AuthorizationException {
+        User deleteUser = findUserById(userToBeDeletedId);
+        User requestingUser = findUserById(requestingUserId);
+        validateUserForDeleting(deleteUser, requestingUser);
+
+        System.out.println(String.format("DELETION: Requesting User: <%s>. Requesting User for deletion User: <%s>", requestingUser, deleteUser));
+        userRepository.deleteById(userToBeDeletedId);
+        System.out.println("DELETION: DONE");
+    }
+    private void validateUserForDeleting(User deleteUser, User requestingUser) throws AuthorizationException, ValidationException {
+
+        if (deleteUser == null)
+            throw new ValidationException("User for deletion not found");
+        if (requestingUser == null)
+            throw new ValidationException("Requesting user not found");
+        if (!WebApiHelper.ADMIN_ROLES.contains(requestingUser.getRole()))
+            throw new AuthorizationException("Deleting user is not allowed to delete");
+        if (deleteUser == requestingUser)
+            throw new AuthorizationException("Can't delete your own account");
+        if (WebApiHelper.PROTECTED_USER_ROLES.contains(deleteUser.getRole()))
+            throw new AuthorizationException("User not allowed for deletion");
+        if (!deleteUser.getUserStatus())
+            throw new ValidationException("User is still active");
     }
 
 
+    /**
+     *
+     * @param deactivatedUserId
+     * @param requestingUserId
+     * @throws AuthorizationException
+     * @throws ValidationException
+     */
+    public void deactivateUser(Integer deactivatedUserId, Integer requestingUserId) throws AuthorizationException, ValidationException{
+        User deactivatedUser = findUserById(deactivatedUserId);
+        User requestingUser = findUserById(requestingUserId);
+        validateUserForDeactivation(deactivatedUser, requestingUser);
+        System.out.println(String.format("DEACTIVATION: Requesting User: <%s>. Requesting User for deactivation User: <%s>", requestingUser, deactivatedUser));
+        deactivatedUser.setUserStatus(false);
+        userRepository.save(deactivatedUser);
+        System.out.println("DEACTIVATION: DONE");
+    }
+    private void validateUserForDeactivation(User deactivatedUser, User requestingUser) throws AuthorizationException, ValidationException {
+        if (deactivatedUser == null)
+            throw new ValidationException("User for deletion not found");
+        if (requestingUser == null)
+            throw new ValidationException("Requesting user not found");
+        if (WebApiHelper.PROTECTED_USER_ROLES.contains(deactivatedUser.getRole()))
+            throw new AuthorizationException("User not allowed for deactivation");
+        if (!(deactivatedUser.getId() == requestingUser.getId()) && !WebApiHelper.ADMIN_ROLES.contains(requestingUser.getRole()))
+            throw new AuthorizationException("User does not have permission to deactivate user");
+    }
 
 }

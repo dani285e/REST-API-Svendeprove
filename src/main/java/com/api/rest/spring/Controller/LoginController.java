@@ -3,6 +3,7 @@ package com.api.rest.spring.Controller;
         import java.util.List;
         import java.util.stream.Collectors;
 
+        import org.springframework.http.HttpStatus;
         import org.springframework.security.core.GrantedAuthority;
         import org.springframework.security.core.authority.AuthorityUtils;
         import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ package com.api.rest.spring.Controller;
         import com.api.rest.spring.Entity.Dto.LoginDto;
         import io.jsonwebtoken.Jwts;
         import io.jsonwebtoken.SignatureAlgorithm;
+        import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/security")
@@ -21,10 +23,15 @@ public class LoginController {
     @PostMapping("/user")
     public LoginDto login(@RequestParam("user") String username, @RequestParam("password") String pwd){
         //TODO Validate user credenticals
-        System.out.println(String.format("Got login attempt with username:%s and password:%s", username, pwd));
-        String token = getJWTToken(username);
-        LoginDto loginDto = new LoginDto(username, token);
-        return loginDto;
+        try {
+
+            System.out.println(String.format("Got login attempt with username:%s and password:%s", username, pwd));
+            String token = getJWTToken(username);
+            LoginDto loginDto = new LoginDto(username, token);
+            return loginDto;
+        } catch (Exception e){
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Login failed", e);
+        }
     }
 
     private String getJWTToken(String username){

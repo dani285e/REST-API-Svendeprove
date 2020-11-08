@@ -4,6 +4,7 @@ import com.api.rest.spring.Entity.Enum.Role;
 import com.api.rest.spring.Entity.User;
 import com.api.rest.spring.WebApiHelper;
 
+import java.util.Objects;
 import java.util.UUID;
 
 public class UserBuilder {
@@ -54,12 +55,12 @@ public class UserBuilder {
 
     public User build() {
         User user = new User();
-        user.setUsername(username);
-        user.setRole(role);
-        user.setPassword(password);
-        user.setSalt(UUID.randomUUID().toString());
-        user.setEmail(email);
-        user.setUserStatus(userStatus);
+        user.setUsername(Objects.requireNonNull(username));
+        user.setRole(Objects.requireNonNull(role));
+        user.setPassword(Objects.requireNonNull(password));
+        user.setSalt(Objects.requireNonNull(UUID.randomUUID().toString()));
+        user.setEmail(Objects.requireNonNull(email));
+        user.setUserStatus(Objects.requireNonNull(userStatus));
         // with variables
 
         return user;
