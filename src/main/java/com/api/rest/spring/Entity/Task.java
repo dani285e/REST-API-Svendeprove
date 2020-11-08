@@ -2,7 +2,9 @@ package com.api.rest.spring.Entity;
 
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -17,6 +19,8 @@ public class Task {
     private String taskOwner;
     private String taskStatus;
     private Date created;
+    @ManyToMany
+    private List<User> users = new ArrayList<>();
 
     @PrePersist
     protected void onCreate(){

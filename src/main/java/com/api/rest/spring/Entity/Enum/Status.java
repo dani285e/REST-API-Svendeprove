@@ -2,6 +2,6 @@ package com.api.rest.spring.Entity.Enum;
 
 public enum Status {
     DONE,
-    STARTED,
+    IN_PROGRESS,
     CREATED
 }

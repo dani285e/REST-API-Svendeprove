@@ -1,9 +1,11 @@
 package com.api.rest.spring.Entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+
+import com.api.rest.spring.Entity.Enum.Role;
+import com.api.rest.spring.Entity.Task;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -14,12 +16,14 @@ public class User {
     @GeneratedValue
     private Integer id;
     private String username;
-    private String role;
+    private Role role;
     private String email;
     private String salt;
     private String password;
-    private String resetPassword;
-    private String deactivateReset;
+    private Boolean userStatus;
+
+    @ManyToMany(mappedBy = "users")
+    private List<Task> tasks = new ArrayList<>();
 
 
     public Integer getId() {
@@ -34,11 +38,11 @@ public class User {
         return username;
     }
 
-    public String getRole() {
+    public Role getRole() {
         return role;
     }
 
-    public void setRole(String role) {
+    public void setRole(Role role) {
         this.role = role;
     }
 
@@ -70,19 +74,11 @@ public class User {
         this.password = password;
     }
 
-    public String getResetPassword() {
-        return resetPassword;
+    public Boolean getUserStatus() {
+        return userStatus;
     }
 
-    public void setResetPassword(String resetPassword) {
-        this.resetPassword = resetPassword;
-    }
-
-    public String getDeactivateReset() {
-        return deactivateReset;
-    }
-
-    public void setDeactivateReset(String deactivateReset) {
-        this.deactivateReset = deactivateReset;
+    public void setUserStatus(Boolean userStatus) {
+        this.userStatus = userStatus;
     }
 }

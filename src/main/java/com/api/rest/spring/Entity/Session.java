@@ -4,6 +4,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.xml.crypto.Data;
 import java.util.Date;
 
 
@@ -17,6 +18,25 @@ public class Session {
     private String sessionId;
     private Boolean sessionStatus;
     private Integer userId;
+    private Date created;
+    private Date expiresOn;
+
+
+    public Date getCreated() {
+        return created;
+    }
+
+    public void setCreated(Date created) {
+        this.created = created;
+    }
+
+    public Date getExpiresOn() {
+        return expiresOn;
+    }
+
+    public void setExpiresOn(Date expiresOn) {
+        this.expiresOn = expiresOn;
+    }
 
     public Integer getId() {
         return id;
