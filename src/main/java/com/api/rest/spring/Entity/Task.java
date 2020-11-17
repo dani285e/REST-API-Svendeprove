@@ -2,6 +2,7 @@ package com.api.rest.spring.Entity;
 
 
 import com.api.rest.spring.Entity.Enum.TaskStatus;
+import com.sun.istack.NotNull;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -16,10 +17,15 @@ public class Task {
     @Id
     @GeneratedValue
     private Integer id;
+    @NotNull
     private String taskName;
+    @NotNull
     private String taskDesc;
-    private String taskOwner;
+    @NotNull
+    private Integer taskOwner;
+    @NotNull
     private TaskStatus taskStatus;
+    @NotNull
     private Date created;
     @ManyToMany
     private List<User> users = new ArrayList<>();
@@ -37,11 +43,11 @@ public class Task {
         this.taskStatus = taskStatus;
     }
 
-    public String getTaskOwner() {
+    public Integer getTaskOwner() {
         return taskOwner;
     }
 
-    public void setTaskOwner(String taskOwner) {
+    public void setTaskOwner(Integer taskOwner) {
         this.taskOwner = taskOwner;
     }
 

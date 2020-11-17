@@ -13,7 +13,7 @@ public class TaskBuilder {
     private Integer id;
     private String taskName;
     private String taskDesc;
-    private String taskOwner;
+    private Integer taskOwner;
     private String taskStatus;
     private Date created;
 
@@ -36,7 +36,7 @@ public class TaskBuilder {
         return this;
     }
 
-    public TaskBuilder withTaskOwner(String taskOwner) {
+    public TaskBuilder withTaskOwner(Integer taskOwner) {
         this.taskOwner = taskOwner;
         return this;
     }

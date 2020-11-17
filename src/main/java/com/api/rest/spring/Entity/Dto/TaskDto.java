@@ -10,11 +10,11 @@ public class TaskDto {
     private Integer id;
     private String taskName;
     private String taskDesc;
-    private String taskOwner;
+    private Integer taskOwner;
     private TaskStatus taskStatus;
     private Date created;
 
-    public TaskDto(Integer id, String taskName, String taskDesc, String taskOwner, TaskStatus taskStatus, Date created) {
+    public TaskDto(Integer id, String taskName, String taskDesc, Integer taskOwner, TaskStatus taskStatus, Date created) {
         this.id = id;
         this.taskName = taskName;
         this.taskDesc = taskDesc;
@@ -47,11 +47,11 @@ public class TaskDto {
         this.taskDesc = taskDesc;
     }
 
-    public String getTaskOwner() {
+    public Integer getTaskOwner() {
         return taskOwner;
     }
 
-    public void setTaskOwner(String taskOwner) {
+    public void setTaskOwner(Integer taskOwner) {
         this.taskOwner = taskOwner;
     }
 

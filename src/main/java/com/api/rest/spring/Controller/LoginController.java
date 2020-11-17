@@ -3,9 +3,18 @@ package com.api.rest.spring.Controller;
         import java.util.List;
         import java.util.stream.Collectors;
 
+        import com.api.rest.spring.Entity.User;
+        import com.api.rest.spring.handlers.LoginHandler;
+        import com.api.rest.spring.handlers.UserHandler;
+        import com.api.rest.spring.handlers.exceptions.AuthorizationException;
+        import com.api.rest.spring.handlers.exceptions.ValidationException;
+        import com.api.rest.spring.repository.UserRepository;
+        import org.springframework.beans.factory.annotation.Autowired;
         import org.springframework.http.HttpStatus;
+        import org.springframework.security.core.AuthenticationException;
         import org.springframework.security.core.GrantedAuthority;
         import org.springframework.security.core.authority.AuthorityUtils;
+        import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
         import org.springframework.web.bind.annotation.PostMapping;
         import org.springframework.web.bind.annotation.RequestMapping;
         import org.springframework.web.bind.annotation.RequestParam;
@@ -20,13 +29,16 @@ package com.api.rest.spring.Controller;
 @RequestMapping("/security")
 public class LoginController {
 
+    @Autowired
+    UserRepository userRepository;
+
     @PostMapping("/user")
     public LoginDto login(@RequestParam("user") String username, @RequestParam("password") String pwd){
         //TODO Validate user credenticals
         try {
-
+            LoginHandler loginHandler = new LoginHandler(userRepository);
             System.out.println(String.format("Got login attempt with username:%s and password:%s", username, pwd));
-            String token = getJWTToken(username);
+            String token = loginHandler.Login(username, pwd);
             LoginDto loginDto = new LoginDto(username, token);
             return loginDto;
         } catch (Exception e){
@@ -34,26 +46,7 @@ public class LoginController {
         }
     }
 
-    private String getJWTToken(String username){
-        String secretKey = "mySecretKey"; //User salt
-        List<GrantedAuthority> grantedAuthorities = AuthorityUtils
-                .commaSeparatedStringToAuthorityList("ROLE_USER"); //User Role
 
-        String token = Jwts
-                .builder()
-                .setId("tokenJWT")
-                .setSubject(username)
-                .claim("authorities",
-                        grantedAuthorities.stream()
-                                .map(GrantedAuthority::getAuthority)
-                                .collect(Collectors.toList()))
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 600000))
-                .signWith(SignatureAlgorithm.HS512,
-                        secretKey.getBytes()).compact();
-
-        return "Bearer " + token;
-    }
 
 //    @Autowired
 //    private SessionRepository sessionRepository;

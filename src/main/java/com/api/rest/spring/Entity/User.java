@@ -3,12 +3,10 @@ package com.api.rest.spring.Entity;
 import javax.persistence.*;
 
 import com.api.rest.spring.Entity.Enum.Role;
-import com.api.rest.spring.Entity.Task;
 import com.sun.istack.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Entity
 @Table(name = "user_tbl")

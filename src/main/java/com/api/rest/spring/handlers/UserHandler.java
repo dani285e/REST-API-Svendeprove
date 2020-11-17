@@ -9,6 +9,7 @@ import com.api.rest.spring.handlers.exceptions.AuthorizationException;
 import com.api.rest.spring.handlers.exceptions.ValidationException;
 import com.api.rest.spring.repository.UserRepository;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
@@ -78,19 +79,30 @@ public class UserHandler {
     }
 
     public void createUser(String username, String role, String password, String email) throws ValidationException {
+        //TODO add hashing to method
         validateUserForCreating(username, role, password, email);
+        String salt = UUID.randomUUID().toString();
+        String hashPassword = hashPasswordWithSalt(password, salt);
 
         UserBuilder userBuilder = UserBuilder.aUserBuilder();
 
         User build = userBuilder
                 .withUsername(username)
                 .withRole(Role.getRoleByName(role))
-                .withSalt(UUID.randomUUID().toString())
-                .withPassword(password)
+                .withSalt(salt)
+                .withPassword(hashPassword)
                 .withUserStatus(WebApiHelper.ACTIVATED_USER)
                 .build();
 
         userRepository.save(build);
+    }
+
+    private String hashPasswordWithSalt(String password, String salt) {
+        //TODO add hashing my project
+        String hashPlusSalt = password + salt;
+        String hashPassword = new SCryptPasswordEncoder().encode(hashPlusSalt);
+
+        return hashPassword;
     }
 
 
