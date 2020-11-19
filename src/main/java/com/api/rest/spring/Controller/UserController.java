@@ -64,6 +64,11 @@ public class UserController {
         }
     }
 
+    @PostMapping("/update")
+    public HttpStatus updateUser(@RequestParam Integer id, @RequestParam UserDto userDto){
+        return HttpStatus.OK;
+    }
+
 //    @GetMapping("/list")
 //    public Iterable<User> getUsers() {
 //        return userRepository.findAll();
