@@ -58,7 +58,7 @@ public class UserBuilder {
         user.setUsername(Objects.requireNonNull(username));
         user.setRole(Objects.requireNonNull(role));
         user.setPassword(Objects.requireNonNull(password));
-        user.setSalt(Objects.requireNonNull(UUID.randomUUID().toString()));
+        user.setSalt(Objects.requireNonNull(salt));
         user.setEmail(Objects.requireNonNull(email));
         user.setUserStatus(Objects.requireNonNull(userStatus));
         // with variables

@@ -45,6 +45,8 @@ public class UserController {
             return HttpStatus.OK;
         } catch (AuthorizationException e){
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getErrorReason()); //e.getErrorReason takes error from userHandler
+        } catch (ValidationException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getErrorReason());
         } catch (ApiException e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, e.getErrorReason());
         }
@@ -64,45 +66,16 @@ public class UserController {
         }
     }
 
-    @PostMapping("/update")
-    public HttpStatus updateUser(@RequestParam Integer id, @RequestParam UserDto userDto){
-        return HttpStatus.OK;
+    @PostMapping("/activate")
+    public HttpStatus updateUser(@RequestParam Integer id, @RequestParam Integer requestingUserId){
+        try {
+            UserHandler userHandler = new UserHandler(userRepository);
+            userHandler.activateUser(id, requestingUserId);
+            return HttpStatus.OK;
+        } catch (AuthorizationException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getErrorReason());
+        } catch (ValidationException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getErrorReason());
+        }
     }
-
-//    @GetMapping("/list")
-//    public Iterable<User> getUsers() {
-//        return userRepository.findAll();
-//    }
-
-//    @GetMapping("/findByName")
-//    public UserDto findUserByUsername(@RequestParam String username) {
-////        User user = new User();
-////        user.setUsername("testUser");
-////        user.setRole(Role.EMPLOYEE);
-////        user.setPassword("password");
-////        user.setSalt("randomSalt");
-////        user.setEmail("email");
-////        user.setUserStatus(true);
-////        userRepository.save(user);
-//
-//        User temp = userRepository.findUserByUsername(username);
-//        Integer uId = temp.getId();
-//        String uName = temp.getUsername();
-//        Role uRole = temp.getRole();
-//        String uEmail = temp.getEmail();
-//         UserDto userDto = new UserDto(uId, uName, uRole.getName(), uEmail);
-//        return userDto; //userDto;
-//    }
-
-
-//    @GetMapping("/find/{id}")
-//    public UserDto findUserById(@PathVariable Integer id) {
-//        User temp = userRepository.findUserById(id);
-//        Integer uId = temp.getId();
-//        String uName = temp.getUsername();
-//        String uRole = temp.getRole();
-//        String uEmail = temp.getEmail();
-//        UserDto userDto = new UserDto(uId, uName, uRole, uEmail);
-//        return userDto;
-//    }
 }

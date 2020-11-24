@@ -7,20 +7,34 @@ import com.api.rest.spring.Entity.Task;
 import java.util.Date;
 
 public class TaskDto {
+
+    private Integer requestingUser;
+
     private Integer id;
     private String taskName;
     private String taskDesc;
     private Integer taskOwner;
     private TaskStatus taskStatus;
-    private Date created;
 
-    public TaskDto(Integer id, String taskName, String taskDesc, Integer taskOwner, TaskStatus taskStatus, Date created) {
+    public Integer getRequestingUser() {
+        return requestingUser;
+    }
+
+    public void setRequestingUser(Integer requestingUser) {
+        this.requestingUser = requestingUser;
+    }
+
+    public void setTaskStatus(TaskStatus taskStatus) {
+        this.taskStatus = taskStatus;
+    }
+
+    public TaskDto(Integer id, String taskName, String taskDesc, Integer taskOwner, TaskStatus taskStatus, Integer requestingUser) {
         this.id = id;
         this.taskName = taskName;
         this.taskDesc = taskDesc;
         this.taskOwner = taskOwner;
         this.taskStatus = taskStatus;
-        this.created = created;
+        this.requestingUser = requestingUser;
     }
 
     public Integer getId() {
@@ -63,11 +77,4 @@ public class TaskDto {
         this.taskStatus = taskStatus;
     }
 
-    public Date getCreated() {
-        return created;
-    }
-
-    public void setCreated(Date created) {
-        this.created = created;
-    }
 }

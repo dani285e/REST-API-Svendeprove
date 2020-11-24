@@ -15,6 +15,7 @@ package com.api.rest.spring.Controller;
         import org.springframework.security.core.AuthenticationException;
         import org.springframework.security.core.GrantedAuthority;
         import org.springframework.security.core.authority.AuthorityUtils;
+        import org.springframework.security.crypto.bcrypt.BCrypt;
         import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
         import org.springframework.web.bind.annotation.*;
 
@@ -35,17 +36,15 @@ public class LoginController {
         String password = loginFormDTO.getPassword();
         System.out.println("Setting user");
         User user = userRepository.findUserByUsername(loginFormDTO.getUsername());
-        String username = user.getUsername();
-        System.out.println("User sat");
-        System.out.println(user);
-        //TODO add hashing
-        //TODO Validate user credentials
+        if (user == null){
+            System.out.println("Missing User");
+        }
         try {
             LoginHandler loginHandler = new LoginHandler(userRepository);
-            System.out.println(String.format("Got login attempt with username:%s and password:%s", username, password));
-            String token = loginHandler.Login(username, password);
+            System.out.println(String.format("Got login attempt with username:%s and password:%s", user.getUsername(), password));
+            String token = loginHandler.Login(user, password);
             System.out.println("Set DTO");
-            LoginDto loginDto = new LoginDto(user.getId(), username, token);
+            LoginDto loginDto = new LoginDto(user.getId(), user.getUsername(), token);
             System.out.println(loginDto);
             System.out.println(HttpStatus.values());
             return loginDto;

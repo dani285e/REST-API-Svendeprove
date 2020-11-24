@@ -7,10 +7,7 @@ import com.api.rest.spring.repository.TaskRepository;
 import com.api.rest.spring.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import javax.naming.AuthenticationException;
@@ -55,10 +52,10 @@ public class TaskController {
     }
 
     @PostMapping("/updateStatus") //TODO find a good name for when you update status
-    public HttpStatus updateTaskStatus(@RequestParam Integer taskId, @RequestParam TaskDto taskDto, @RequestParam Integer userId) throws ValidationException, AuthenticationException{
+    public HttpStatus updateTaskStatus(@RequestBody TaskDto taskDto) throws ValidationException, AuthenticationException{
         try {
             TaskHandler taskHandler = new TaskHandler(taskRepository, userRepository);
-            taskHandler.updateStatus(taskId, taskDto, userId);
+            taskHandler.updateStatus(taskDto);
             return HttpStatus.OK;
         } catch (ValidationException e){
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getErrorReason());

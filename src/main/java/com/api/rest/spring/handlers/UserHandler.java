@@ -9,6 +9,8 @@ import com.api.rest.spring.handlers.exceptions.AuthorizationException;
 import com.api.rest.spring.handlers.exceptions.ValidationException;
 import com.api.rest.spring.repository.UserRepository;
 import org.springframework.dao.DataAccessException;
+import org.springframework.security.crypto.bcrypt.BCrypt;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
 import javax.mail.internet.AddressException;
@@ -81,8 +83,8 @@ public class UserHandler {
     public void createUser(String username, String role, String password, String email) throws ValidationException {
         //TODO add hashing to method
         validateUserForCreating(username, role, password, email);
-        String salt = UUID.randomUUID().toString();
-        String hashPassword = hashPasswordWithSalt(password, salt);
+        String salt = BCrypt.gensalt();
+        String hashPassword = BCrypt.hashpw(password, salt);
 
         UserBuilder userBuilder = UserBuilder.aUserBuilder();
 
@@ -92,19 +94,11 @@ public class UserHandler {
                 .withSalt(salt)
                 .withPassword(hashPassword)
                 .withUserStatus(WebApiHelper.ACTIVATED_USER)
+                .withEmail(email)
                 .build();
 
         userRepository.save(build);
     }
-
-    private String hashPasswordWithSalt(String password, String salt) {
-        //TODO add hashing my project
-        String hashPlusSalt = password + salt;
-        String hashPassword = new SCryptPasswordEncoder().encode(hashPlusSalt);
-
-        return hashPassword;
-    }
-
 
     /**
      *
@@ -220,7 +214,7 @@ public class UserHandler {
             throw new AuthorizationException("Can't delete your own account");
         if (WebApiHelper.PROTECTED_USER_ROLES.contains(deleteUser.getRole()))
             throw new AuthorizationException("User not allowed for deletion");
-        if (!deleteUser.getUserStatus())
+        if (deleteUser.getUserStatus())
             throw new ValidationException("User is still active");
     }
 
@@ -248,8 +242,30 @@ public class UserHandler {
             throw new ValidationException("Requesting user not found");
         if (WebApiHelper.PROTECTED_USER_ROLES.contains(deactivatedUser.getRole()))
             throw new AuthorizationException("User not allowed for deactivation");
+        if (deactivatedUser.getUserStatus() == false)
+            throw new ValidationException("Requesting user already sat to deactivated");
         if (!(deactivatedUser.getId() == requestingUser.getId()) && !WebApiHelper.ADMIN_ROLES.contains(requestingUser.getRole()))
             throw new AuthorizationException("User does not have permission to deactivate user");
     }
 
+    public void activateUser(Integer activatedUserId, Integer requestingUserId) throws ValidationException, AuthorizationException {
+        User activatedUser = findUserById(activatedUserId);
+        User requestingUser = findUserById(requestingUserId);
+        validateUserForActivation(activatedUser, requestingUser);
+        System.out.println(String.format("DEACTIVATION: Requesting User: <%s>. Requesting User for Activate User: <%s>", requestingUser, activatedUser));
+        activatedUser.setUserStatus(true);
+        userRepository.save(activatedUser);
+        System.out.println("ACTIVATION: DONE");
+    }
+
+    private void validateUserForActivation(User activatedUser, User requestingUser) throws ValidationException, AuthorizationException {
+        if (activatedUser == null)
+            throw new ValidationException("User for activation not found");
+        if (requestingUser == null)
+            throw new ValidationException("Requesting user not found");
+        if (activatedUser.getUserStatus() == true)
+            throw new ValidationException("Requesting user already activated");
+        if (!(activatedUser.getId() == requestingUser.getId()) && !WebApiHelper.ADMIN_ROLES.contains(requestingUser.getRole()))
+            throw new AuthorizationException("User does not have permission to deactivate user");
+    }
 }

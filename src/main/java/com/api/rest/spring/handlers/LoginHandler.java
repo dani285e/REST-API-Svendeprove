@@ -8,6 +8,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
 
 import java.util.Date;
@@ -22,33 +23,27 @@ public class LoginHandler {
     public LoginHandler(UserRepository userRepository) {
         this.userRepository = Objects.requireNonNull(userRepository);
     }
-    public String Login(String username, String password) throws ValidationException, AuthorizationException {
-        ValidateLogin(username, password);
 
-        return getJWTToken(username);
+
+    public String Login(User user, String password) throws ValidationException, AuthorizationException {
+
+        String hashPassword = BCrypt.hashpw(password, user.getSalt());
+
+        ValidateLogin(user, hashPassword);
+
+        return getJWTToken(user.getUsername());
     }
 
 
-    private void ValidateLogin(String username, String pwd) throws ValidationException, AuthorizationException {
-        if (username == null)
+    private void ValidateLogin(User user, String hashedPassword) throws ValidationException, AuthorizationException {
+        if (user.getUsername() == null)
             throw new ValidationException("Missing username");
-        if (pwd == null)
+        if (hashedPassword == null)
             throw new ValidationException("Missing password");
-        User user = userRepository.findUserByUsername(username);
-        if (user.getPassword() == null)
-            throw new ValidationException("User is missing password");
-        //TODO check with salt
-//        String hashPassword = hashPasswordWithSalt(pwd, user.getSalt());
-//        if (!user.getPassword().equals(hashPassword))
-//            throw new AuthorizationException("User failed to login");
+        if (!user.getPassword().equals(hashedPassword))
+            throw new ValidationException("User failed to login");
     }
 
-    private String hashPasswordWithSalt(String password, String salt) {
-        String hashPlusSalt = password + salt;
-        String hashPassword = new SCryptPasswordEncoder().encode(hashPlusSalt);
-
-        return hashPassword;
-    }
 
     private String getJWTToken(String username){
         User user =  userRepository.findUserByUsername(username);

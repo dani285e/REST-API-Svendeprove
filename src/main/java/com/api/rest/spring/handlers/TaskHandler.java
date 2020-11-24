@@ -1,19 +1,20 @@
 package com.api.rest.spring.handlers;
 
 import com.api.rest.spring.Entity.Dto.TaskDto;
+import com.api.rest.spring.Entity.Enum.Role;
 import com.api.rest.spring.Entity.Enum.TaskStatus;
 import com.api.rest.spring.Entity.Task;
 import com.api.rest.spring.Entity.User;
+import com.api.rest.spring.Entity.builders.TaskBuilder;
+import com.api.rest.spring.Entity.builders.UserBuilder;
 import com.api.rest.spring.WebApiHelper;
 import com.api.rest.spring.handlers.exceptions.ValidationException;
 import com.api.rest.spring.repository.TaskRepository;
 import com.api.rest.spring.repository.UserRepository;
+import com.sun.istack.NotNull;
 
 import javax.naming.AuthenticationException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 public class TaskHandler {
 
@@ -28,7 +29,28 @@ public class TaskHandler {
 
 
     public void addTask(String taskName, String taskDesc, Integer taskOwner) throws AuthenticationException, ValidationException {
-        //TODO add task
+        ValidateAddTask(taskName, taskDesc, taskOwner);
+
+        TaskBuilder taskBuilder = TaskBuilder.aTaskBuilder();
+
+        Task build = taskBuilder
+                .withTaskName(taskName)
+                .withTaskDesc(taskDesc)
+                .withTaskOwner(taskOwner)
+                .withTaskStatus(TaskStatus.CREATED.toString())
+                .build();
+
+        taskRepository.save(build);
+
+    }
+
+    private void ValidateAddTask(String taskName, String taskDesc, Integer taskOwner) throws ValidationException {
+            if (taskName == null || taskName.isEmpty())
+                throw new ValidationException("Missing taskName");
+            if (taskDesc == null || taskDesc.isEmpty())
+                throw new ValidationException("Missing taskDesc");
+            if (taskOwner == null)
+                throw new ValidationException("Missing taskOwner");
     }
 
     /**
@@ -42,11 +64,13 @@ public class TaskHandler {
     public List<TaskDto> createTaskList(Integer userId, Integer requestingUserId) throws AuthenticationException, ValidationException{
 
         ValidateUser(userId, requestingUserId);
-        List<Task> tasks = taskRepository.findAllByUsers(userId);
+        Optional<User> nullableUser = userRepository.findById(userId);
+        List<User> user = List.of(nullableUser.get());
+        Iterable<Task> tasks = taskRepository.findAllByTaskOwnerOrUsersIn(userId, user);
 
         List<TaskDto> resultObjects = new ArrayList<>();
         for (Task task : tasks) {
-             TaskDto dto = new TaskDto(task.getId(), task.getTaskName(), task.getTaskDesc(), task.getTaskOwner(), task.getTaskStatus(), task.getCreated());
+             TaskDto dto = new TaskDto(task.getId(), task.getTaskName(), task.getTaskDesc(), task.getTaskOwner(), task.getTaskStatus(), null);
              resultObjects.add(dto);
         }
 
@@ -65,6 +89,9 @@ public class TaskHandler {
      */
     public void removeTask(Integer requestingUserId, Integer taskId) throws ValidationException, AuthenticationException{
         Task task = taskRepository.findTaskById(taskId);
+        if (task == null) {
+            throw new ValidationException("Task does not exist");
+        }
         User requestingUser = userRepository.findUserById(task.getTaskOwner());
         ValidateRemoveTask(requestingUser, task);
 
@@ -117,11 +144,16 @@ public class TaskHandler {
 
 
 
-    public void updateStatus(Integer taskId, TaskDto taskDto, Integer userId) throws ValidationException, AuthenticationException {
-        ValidateUpdateStatus(taskDto, userId);
+    public void updateStatus(TaskDto taskDto) throws ValidationException, AuthenticationException {
+        Integer requestingUser = taskDto.getRequestingUser();
+        Integer taskId = taskDto.getId();
+        ValidateUpdateStatus(taskDto, requestingUser);
         Task task = taskRepository.findTaskById(taskId);
+        if (task == null) {
+            throw new ValidationException(String.format("Task with id <%s> does not exist", taskId));
+        }
         task.setTaskStatus(taskDto.getTaskStatus());
-        System.out.println(String.format("UPDATE_STATUS: Requesting Status: <%s>. Requesting UserId for updating Status: <%s>", taskDto.getTaskStatus(), userId));
+        System.out.println(String.format("UPDATE_STATUS: Requesting Status: <%s>. Requesting UserId for updating Status: <%s>", taskDto.getTaskStatus(), requestingUser));
         taskRepository.save(task);
         System.out.println("UPDATE_STATUS: DONE");
     }
