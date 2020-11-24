@@ -2,6 +2,7 @@ package com.api.rest.spring.Entity.Dto;
 
 public class LoginDto {
 
+    private Integer userId;
     private String username;
     private String token;
 
@@ -21,8 +22,17 @@ public class LoginDto {
         this.token = token;
     }
 
-    public LoginDto(String username, String token) {
+    public LoginDto(Integer userId, String username, String token) {
+        this.userId = userId;
         this.username = username;
         this.token = token;
+    }
+
+    public Integer getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Integer userId) {
+        this.userId = userId;
     }
 }

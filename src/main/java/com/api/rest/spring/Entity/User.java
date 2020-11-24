@@ -17,6 +17,7 @@ public class User {
     private Integer id;
     @NotNull
     private String username;
+    @Enumerated(EnumType.STRING)
     @NotNull
     private Role role;
     @NotNull

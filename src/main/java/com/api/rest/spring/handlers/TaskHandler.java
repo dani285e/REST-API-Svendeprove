@@ -42,7 +42,7 @@ public class TaskHandler {
     public List<TaskDto> createTaskList(Integer userId, Integer requestingUserId) throws AuthenticationException, ValidationException{
 
         ValidateUser(userId, requestingUserId);
-        List<Task> tasks = taskRepository.findAllByUser(userId);
+        List<Task> tasks = taskRepository.findAllByUsers(userId);
 
         List<TaskDto> resultObjects = new ArrayList<>();
         for (Task task : tasks) {

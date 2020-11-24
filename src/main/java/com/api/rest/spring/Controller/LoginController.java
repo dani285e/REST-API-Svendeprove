@@ -3,6 +3,7 @@ package com.api.rest.spring.Controller;
         import java.util.List;
         import java.util.stream.Collectors;
 
+        import com.api.rest.spring.Entity.Dto.LoginFormDTO;
         import com.api.rest.spring.Entity.User;
         import com.api.rest.spring.handlers.LoginHandler;
         import com.api.rest.spring.handlers.UserHandler;
@@ -15,10 +16,7 @@ package com.api.rest.spring.Controller;
         import org.springframework.security.core.GrantedAuthority;
         import org.springframework.security.core.authority.AuthorityUtils;
         import org.springframework.security.crypto.scrypt.SCryptPasswordEncoder;
-        import org.springframework.web.bind.annotation.PostMapping;
-        import org.springframework.web.bind.annotation.RequestMapping;
-        import org.springframework.web.bind.annotation.RequestParam;
-        import org.springframework.web.bind.annotation.RestController;
+        import org.springframework.web.bind.annotation.*;
 
         import com.api.rest.spring.Entity.Dto.LoginDto;
         import io.jsonwebtoken.Jwts;
@@ -32,14 +30,24 @@ public class LoginController {
     @Autowired
     UserRepository userRepository;
 
-    @PostMapping("/user")
-    public LoginDto login(@RequestParam("user") String username, @RequestParam("password") String pwd){
-        //TODO Validate user credenticals
+    @PostMapping(value = "/user", consumes = "application/json", produces = "application/json")
+    public LoginDto login(@RequestBody LoginFormDTO loginFormDTO){
+        String password = loginFormDTO.getPassword();
+        System.out.println("Setting user");
+        User user = userRepository.findUserByUsername(loginFormDTO.getUsername());
+        String username = user.getUsername();
+        System.out.println("User sat");
+        System.out.println(user);
+        //TODO add hashing
+        //TODO Validate user credentials
         try {
             LoginHandler loginHandler = new LoginHandler(userRepository);
-            System.out.println(String.format("Got login attempt with username:%s and password:%s", username, pwd));
-            String token = loginHandler.Login(username, pwd);
-            LoginDto loginDto = new LoginDto(username, token);
+            System.out.println(String.format("Got login attempt with username:%s and password:%s", username, password));
+            String token = loginHandler.Login(username, password);
+            System.out.println("Set DTO");
+            LoginDto loginDto = new LoginDto(user.getId(), username, token);
+            System.out.println(loginDto);
+            System.out.println(HttpStatus.values());
             return loginDto;
         } catch (Exception e){
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Login failed", e);

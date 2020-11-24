@@ -16,6 +16,6 @@ public interface TaskRepository extends CrudRepository<Task, Integer> {
     void deleteById(Integer id);
 
     @Query("select t.* from dbo.task_users tu inner join dbo.task t on tu.tasks_id = t.id where tu.users_id = :userId")
-    List<Task> findAllByUser(@Param("userId") Integer userId);
+    List<Task> findAllByUsers(@Param("userId") Integer userId);
 }
 
